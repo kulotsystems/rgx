@@ -1,4 +1,4 @@
-<h4>Regular Expression to NFA Converter and Simulator</h4>
+<h2>Regular Expression to NFA Converter and Simulator</h2>
 <small>
     <b>Supported Regex Operators:</b>
     <table>
