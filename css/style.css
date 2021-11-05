@@ -1,0 +1,128 @@
+* {
+    font-family: "Century Gothic","CenturyGothicRegular",Verdana,Tahoma,Helvetica,sans-serif;
+}
+
+body
+{
+	background: #E0DFDF;
+	background: linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
+	background: -webkit-linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
+	background: -moz-linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
+	background: -o-linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
+	background: -ms-linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
+	background: linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
+	-svg-background: linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
+	background-attachment: fixed !important;
+	margin: 0 auto;
+	font-size: 13px;
+	font-family: Arial, 'Arial Unicode MS', Helvetica, Sans-Serif;
+	font-weight: normal;
+	font-style: normal;
+	min-height: 100%;
+	left: 0;
+	top: 0;
+}
+
+svg {
+    background: #f7f6f6;
+}
+
+#navbar .navbar-brand {
+    font-weight: bold;
+    font-size: 1.4;
+}
+
+.main{
+    position: absolute;
+    left:0;
+    width: 100%;
+}
+
+.main .container {
+    padding-top: 14px;
+    padding-bottom: 14px;
+    border-radius: 2px;
+}
+
+footer {
+    height: 30px !important;
+    text-align: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+footer h5, footer h6 {
+    margin: 0;
+    margin-bottom: 3px;
+    color: #666 !important;
+    text-shadow: 1px 1px #ddd;
+    font-family: "Century Gothic","CenturyGothicRegular",Verdana,Tahoma,Helvetica,sans-serif;
+}
+
+.Q {
+    stroke:#000;
+    stroke-width:1.5;
+    fill: transparent;
+}
+
+.text {
+    font-size: 1.2em;
+    dominant-baseline: middle;
+    text-anchor: start;
+    fill: blue;
+}
+
+.epsilon {
+    font-style: italic;
+    fill: gray;
+}
+
+.center-align {
+    text-anchor: middle;
+}
+
+.state {
+    font-size: 1.4em;
+    fill: #000;
+}
+
+.arrow {
+    stroke: #000;
+    stroke-width: 1.2;
+    fill: transparent;
+}
+
+.br {
+    border-right: 1px solid #ddd;
+}
+
+#tblTransition td {
+    text-align: center;
+    font-size: 1em;
+}
+
+#tblTransition thead td {
+    color: blue;
+    font-size: 1.2em;
+}
+
+#tblTransition tbody tr td:first-child {
+    color: green;
+    font-size: 1.1em;
+}
+
+.panel-heading {
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+.panel-body {
+    max-width: 555px;
+    max-height: 545px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+#txtRegex {
+    font-size: 1.3em;
+}

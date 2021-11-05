@@ -1,0 +1,150 @@
+#arvalert, #arvconfirm{
+    position: fixed;
+    left:0;
+    top:0;
+    width: 100%;
+    height: 100%;
+    font-size: 0;
+    display: none;
+}
+
+#divopacityAlert, #divopacityConfirm{
+    position: fixed;
+    background: #000;
+    width: 100%;
+    height: 100%;
+    opacity: .4;
+    font-size: 1px;
+}
+
+#alertMessage, #confirmMessage {
+    padding-bottom: 20px;
+}
+
+#popupContent {
+    padding-bottom: 15px;
+}
+
+#divopacityAlert{
+    z-index: 956;
+}
+
+#divopacityConfirm{
+    z-index: 958;
+}
+
+#divopacityPopup{
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    opacity: .4;
+    display: none;
+}
+
+#divopacityPopup{
+    z-index: 20;
+}
+
+#arvpopup{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+#arvpopup{
+    z-index: 30;
+}
+
+#arvalert > table, #arvconfirm > table, #arvpopup > table{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+#arvalert > table{
+    z-index: 957;
+}
+
+#arvconfirm > table{
+    z-index: 959;
+}
+
+#arvpopup > table{
+    width: 100%;
+    height: 100%;
+}
+
+#divalert, #divconfirm{
+    font-size: 18px;
+    max-width: 19.8em;
+    margin-left: 7px;
+    margin-right: 7px;
+    background: transparent;
+}
+
+#divpopup{
+    margin-left: 7px;
+    margin-right: 7px;
+    background: transparent;
+}
+
+#divpopup {
+    margin-top: 7px !important;
+    margin-bottom: 7px !important;
+}
+
+#divpopup{
+    max-width: 500px;
+}
+
+#btnArvAlertOK, #btnArvConfirmYes, #btnArvConfirmNo{
+    font-size: 15px;
+}
+
+.modal-header{
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    padding-top: 6px;
+    padding-left: 6px;
+    padding-bottom: 6px;
+    text-align: center;
+}
+
+.modal-footer{
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    padding: 5px;
+    background: white;
+}
+
+.modal-body {
+    padding-bottom: 0px;
+    background: white;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.alert-title {
+    font-weight: bold;
+}
+
+#arvpopup .divTheme {
+    max-width: 810px;
+    padding: 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+#arvpopup .img-theme {
+    width: 100%;
+    cursor: pointer;
+    border: 0;
+}

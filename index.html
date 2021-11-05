@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Regex to NFA Converter and Simulator</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/z_arvalert.css">
+    <style>.arrow{marker-end: url(#arrow);}</style>
+</head>
+<body>
+    <nav id="navbar" class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#"></a>
+            </div>
+			<div>
+				<div class="nav navbar-nav navbar-right" style="padding-left: 15px; padding-right: 15px; margin-right: -15px">
+					<div class="navbar-form">
+						<div class="input-group">
+							<div class="input-group-addon">Regex:</div>
+							<input id="txtRegex" type="text" class="form-control">
+							<div class="input-group-btn">
+								<button id="btnConvert" class="btn btn-default" disabled><i class="glyphicon glyphicon-arrow-right"></i></button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+        </div>
+    </nav>
+
+    <div class="main">
+        <div class="container" style="background: white">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">Transition Table</div>
+                        <div class="panel-body">
+                            <table id="tblTransition" class="table table-responsive table-hover"></table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">State Diagram for <span class="label label-info" style="font-size: 1.1em" id="spRgxProcessed"></span></div>
+                        <div class="panel-body" style="padding: 0;">
+                            <svg width="555" height="545" id="svg">
+                                <defs id='markerDefs'><marker id='arrow' markerWidth='9' markerHeight='7' refx='8' refy='4' orient='auto' markerUnits='strokeWidth'><path d='M0,0 L0,7 L9,4 Z' fill='#000'></path></marker></defs>
+                                <g></g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <br>
+            <h6>Copyright &copy; 2016 | All rights reserved</h6>
+			<br>
+        </footer>
+    </div>
+    <div id="arvalert"><div id="divopacityAlert">&nbsp;</div><table><tr><td align="center"><div id="divalert" class="modal-content"><div class="modal-header alert-warning">&nbsp;</div><div class="modal-body" style="border-bottom-left-radius:0; border-bottom-right-radius:0"><div id="alertMessage">&nbsp;</div></div><div class="modal-footer alert-warning"><span id="btnArvAlertOK" class="btn btn-warning btn-block">Okay</span></div></div></td></tr></table></div><div id="arvconfirm"><div id="divopacityConfirm">&nbsp;</div><table><tr><td align="center"><div id="divconfirm" class="modal-content"><div class="modal-header alert-warning">&nbsp;</div><div class="modal-body" style="border-bottom-left-radius:0; border-bottom-right-radius:0"><div id="confirmMessage">&nbsp;</div></div><div class="modal-footer alert-warning"><div class="btn-group" style="width:100%"><span id="btnArvConfirmYes" class="btn btn-primary" style="width:50%">Yes</span><span id="btnArvConfirmNo" class="btn btn-danger" style="width:50%">No</span></div></div></div></td></tr></table></div><div id="divopacityPopup">&nbsp</div><div id="arvpopup"><table><tr><td align="center"><div id="divpopup" class="modal-content"><div class="modal-header alert-warning" style="text-align: left"><span id="spanClosePopup" class="close" aria-label="Close" data-toggle="tooltip" title="Close" data-placement="left"><span class="glyphicon glyphicon-remove"></span></span><span id="popupTitle" class="alert-title">&nbsp;</span></div><div class="modal-body"><div id="popupContent" align="center"></div></div></div></td></tr></table></div>
+
+    <script src="js/jquery.js"></script>
+    <script src="js/z_arvalert.js"></script>
+    <script src="js/interface.js"></script>
+    <script src="js/misc.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/algorithm.js"></script>
+</body>
+</html>
