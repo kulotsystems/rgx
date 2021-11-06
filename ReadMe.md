@@ -11,14 +11,14 @@
         </thead>
         <tbody>
             <tr>
-                <td align="center"><b><code>?</code></b></td>
-                <td><small>The preceding item is optional and will be matched, at most, once.</small></td>
-                <td align="center"><code>a?b</code></td>
-            </tr>
-            <tr>
                 <td align="center"><b><code>&ast;</code></b></td>
                 <td><small>The preceding item will be matched zero or more times.</small></td>
                 <td align="center"><code>a&ast;b</code></td>
+            </tr>
+            <tr>
+                <td align="center"><b><code>?</code></b></td>
+                <td><small>The preceding item is optional and will be matched, at most, once.</small></td>
+                <td align="center"><code>a?b</code></td>
             </tr>
             <tr>
                 <td align="center"><b><code>+</code></b></td>
