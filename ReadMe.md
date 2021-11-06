@@ -37,3 +37,5 @@
 </small>
 <hr>
 <small><b>How to run:</b> Just open <code>index.html</code> on your web browser.</small>
+<br><br>
+<small><i>(This project was created in year 2016)</i></small>

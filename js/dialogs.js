@@ -1,41 +1,41 @@
-var arvAlert, divAlert, alertMessage, btnArvAlertOK, arvConfirm, divConfirm, confirmMessage, btnArvConfirmYes, btnArvConfirmNo;
-var arvPopup, divPopup, popupTitle, popupContent, spanClosePopup, divopacityPopup;
+var alertDialog, divAlert, alertMessage, btnAlertOK, confirmDialog, divConfirm, confirmMessage, btnConfirmYes, btnConfirmNo;
+var popupDialog, divPopup, popupTitle, popupContent, spanClosePopup, divOpacityPopup;
 
 $(function(){
    var p = window.parent.document;
 
-   arvAlert = $(p.getElementById('arvalert'));
+   alertDialog = $(p.getElementById('alert'));
    divAlert = $(p.getElementById('divalert'));
    alertMessage = $(p.getElementById('alertMessage'));
-   btnArvAlertOK = $(p.getElementById('btnArvAlertOK'));
+   btnAlertOK = $(p.getElementById('btnAlertOK'));
 
-   arvConfirm = $(p.getElementById('arvconfirm'));
+   confirmDialog = $(p.getElementById('confirm'));
    divConfirm = $(p.getElementById('divconfirm'));
    confirmMessage = $(p.getElementById('confirmMessage'));
-   btnArvConfirmYes = $(p.getElementById('btnArvConfirmYes'));
-   btnArvConfirmNo = $(p.getElementById('btnArvConfirmNo'));
+   btnConfirmYes = $(p.getElementById('btnConfirmYes'));
+   btnConfirmNo = $(p.getElementById('btnConfirmNo'));
 
-   divopacityPopup = $(p.getElementById('divopacityPopup'));
-   arvPopup = $(p.getElementById('arvpopup'));
-   divPopup = $(p.getElementById('divpopup'));
+   divOpacityPopup = $(p.getElementById('divOpacityPopup'));
+   popupDialog = $(p.getElementById('popup'));
+   divPopup = $(p.getElementById('divPopup'));
    popupTitle = $(p.getElementById('popupTitle'));
    popupContent = $(p.getElementById('popupContent'));
    spanClosePopup = $(p.getElementById('spanClosePopup'));
 
-   btnArvConfirmNo.on('click', function(){
-      hideArvConfirm();
+   btnConfirmNo.on('click', function(){
+      hideconfirmDialog();
    });
 
-   btnArvAlertOK.on('click', function(){
-      hideArvAlert();
+   btnAlertOK.on('click', function(){
+      hidealertDialog();
    });
 
    spanClosePopup.on('click', function(){
-       hideArvPopup();
+       hidepopupDialog();
    });
 });
 
-function showArvPopup(e, t){
+function showpopupDialog(e, t){
     divPopup.parent().css({'padding-top':window.parent.scrollY.toString() + 'px'});
     popupContent.html('');
     var eclone = e.clone();
@@ -44,72 +44,72 @@ function showArvPopup(e, t){
     divPopup.css({
         'margin-bottom':'1%'
     });
-    divopacityPopup.fadeIn(20, function(){
+    divOpacityPopup.fadeIn(20, function(){
         divPopup.animate({'margin-bottom':'0%'}, 100);
-        arvPopup.fadeIn(100);
+        popupDialog.fadeIn(100);
         popupTitle.html(t);
     });
 }
 
-function hideArvPopup(){
-    arvPopup.fadeOut(1, function(){
+function hidepopupDialog(){
+    popupDialog.fadeOut(1, function(){
         popupContent.html('');
     });
-    divopacityPopup.fadeOut(200);
+    divOpacityPopup.fadeOut(200);
     divPopup.animate({'margin-bottom' : '1%'}, 200, function() {
         divPopup.css({'max-width':'500px'});
-        divopacityPopup.css({'opacity':'0.4'});
+        divOpacityPopup.css({'opacity':'0.4'});
     });
-    arvPopup.css({'position':'absolute'});
+    popupDialog.css({'position':'absolute'});
 }
 
-function showArvConfirm(msg)
+function showconfirmDialog(msg)
 {
-    btnArvConfirmYes.off();
+    btnConfirmYes.off();
 
     confirmMessage.html('&nbsp;');
-    btnArvConfirmYes.html('&nbsp;');
-    btnArvConfirmNo.html('&nbsp;');
+    btnConfirmYes.html('&nbsp;');
+    btnConfirmNo.html('&nbsp;');
 
     divConfirm.slideUp(1);
     divConfirm.css({'max-width':'16.5em'});
-    arvConfirm.fadeIn(1, function(){
+    confirmDialog.fadeIn(1, function(){
         divConfirm.slideDown(80);
         divConfirm.animate({'margin-bottom': '20%', 'max-width':'19.8em'}, 160, function(){
             confirmMessage.html(msg);
-            btnArvConfirmYes.html('Yes');
-            btnArvConfirmNo.html('No');
+            btnConfirmYes.html('Yes');
+            btnConfirmNo.html('No');
         });
     });
 }
 
-function showArvAlert(msg)
+function showalertDialog(msg)
 {
     alertMessage.html('&nbsp;');
-    btnArvAlertOK.html('&nbsp;');
+    btnAlertOK.html('&nbsp;');
 
     divAlert.slideUp(1);
     divAlert.css({'max-width':'16.5em'});
-    arvAlert.fadeIn(1, function(){
+    alertDialog.fadeIn(1, function(){
         divAlert.slideDown(80);
         divAlert.animate({'margin-bottom': '20%', 'max-width':'19.8em'}, 160, function(){
             alertMessage.html(msg);
-            btnArvAlertOK.html('Okay');
+            btnAlertOK.html('Okay');
         });
     });
 }
 
-function hideArvAlert()
+function hidealertDialog()
 {
     divAlert.animate({'margin-bottom' : '10%'}, 150);
-    arvAlert.fadeOut(150);
+    alertDialog.fadeOut(150);
 }
 
-function hideArvConfirm()
+function hideconfirmDialog()
 {
     divConfirm.animate({'margin-bottom' : '10%'}, 150);
-    arvConfirm.fadeOut(150);
-    arvConfirm.css({'position':'fixed'});
+    confirmDialog.fadeOut(150);
+    confirmDialog.css({'position':'fixed'});
     divConfirm.parent().css({'padding-top':'0px'});
-    btnArvConfirmYes.off();
+    btnConfirmYes.off();
 }
