@@ -58,11 +58,11 @@ $(function() {
         if(rgx.indexOf('(') > -1 || rgx.indexOf(')') > -1) {
             if(!areParenthesisMatched(rgx)) {
                 rgx = '';
-                showalertDialog("Invalid Regular Expression. Unmatched parenthesis.");
+                showAlertDialog("Invalid Regular Expression. Unmatched parenthesis.");
             }
         }
         if(!areOperatorsValid(rgx)) {
-            showalertDialog("Invalid Regular Expression");
+            showAlertDialog("Invalid Regular Expression");
         }
         else if(rgx != '') {
             concatInput('');

@@ -23,19 +23,19 @@ $(function(){
    spanClosePopup = $(p.getElementById('spanClosePopup'));
 
    btnConfirmNo.on('click', function(){
-      hideconfirmDialog();
+      hideConfirmDialog();
    });
 
    btnAlertOK.on('click', function(){
-      hidealertDialog();
+      hideAlertDialog();
    });
 
    spanClosePopup.on('click', function(){
-       hidepopupDialog();
+       hidePopupDialog();
    });
 });
 
-function showpopupDialog(e, t){
+function showPopupDialog(e, t){
     divPopup.parent().css({'padding-top':window.parent.scrollY.toString() + 'px'});
     popupContent.html('');
     var eclone = e.clone();
@@ -51,7 +51,7 @@ function showpopupDialog(e, t){
     });
 }
 
-function hidepopupDialog(){
+function hidePopupDialog(){
     popupDialog.fadeOut(1, function(){
         popupContent.html('');
     });
@@ -63,7 +63,7 @@ function hidepopupDialog(){
     popupDialog.css({'position':'absolute'});
 }
 
-function showconfirmDialog(msg)
+function showConfirmDialog(msg)
 {
     btnConfirmYes.off();
 
@@ -83,7 +83,7 @@ function showconfirmDialog(msg)
     });
 }
 
-function showalertDialog(msg)
+function showAlertDialog(msg)
 {
     alertMessage.html('&nbsp;');
     btnAlertOK.html('&nbsp;');
@@ -99,13 +99,13 @@ function showalertDialog(msg)
     });
 }
 
-function hidealertDialog()
+function hideAlertDialog()
 {
     divAlert.animate({'margin-bottom' : '10%'}, 150);
     alertDialog.fadeOut(150);
 }
 
-function hideconfirmDialog()
+function hideConfirmDialog()
 {
     divConfirm.animate({'margin-bottom' : '10%'}, 150);
     confirmDialog.fadeOut(150);
