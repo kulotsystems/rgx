@@ -28,5 +28,6 @@
     <li><code><b>a|(b|c)</b></code></li>
     <li><code><b>(a|b)|c</b></code></li>
 </ul>
-<br>
+<hr>
+<small><b>How to run:</b> Just open <code>index.html</code> on your web browser.</small><br><br>
 <small><i>(This project was created in year 2016)</i></small>
