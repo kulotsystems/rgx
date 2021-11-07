@@ -14,13 +14,13 @@ function parseRgx(rgx) {
             var insideRgx = rgx.substr(1, rgxL-3);
             proceed = areParenthesisMatched(insideRgx);
         }
-		
+
         if(!proceed) {
-			var e = new Array();
+            var e = new Array();
             for (var i = 0; i < rgxL; i++) {
                 if (rgx[i] == '|') {
-					var leftRgx = rgx.substr(0, i);
-					if(areParenthesisMatched(leftRgx)) {
+                    var leftRgx = rgx.substr(0, i);
+                    if(areParenthesisMatched(leftRgx)) {
                         var d = new Array();
 
                         var rightRgx = rgx.substr(i + 1, rgx.length - i);
@@ -37,7 +37,7 @@ function parseRgx(rgx) {
                     }
                 }
             }
-			proceed = (e.length == 0);
+            proceed = (e.length == 0);
         }
     }
     else
@@ -69,7 +69,7 @@ function parseRgx(rgx) {
                 } catch (e) {
                     d = '';
                 }
-				e.push(parseRgx(str));
+                e.push(parseRgx(str));
                 if(isOperator(d) && d != '|') {
                     e.push(d);
                     e.push('(' + str + ')' + d);
@@ -150,10 +150,10 @@ function simulate(rgx) {
         var panelBody = svg.parent().parent();
         var panelBodyHeight = parseInt(panelBody.css('height'));
         var panelBodyWidth = parseInt(panelBody.css('width'));
-		panelBody.animate({
-			scrollTop: topCoordinates[i] - panelBodyHeight + stateDiameter * 2,
-			scrollLeft: leftCoordinates[i] - panelBodyWidth + stateDiameter * 3
-		}, 150);
+        panelBody.animate({
+            scrollTop: topCoordinates[i] - panelBodyHeight + stateDiameter * 2,
+            scrollLeft: leftCoordinates[i] - panelBodyWidth + stateDiameter * 3
+        }, 150);
     }, simInterval);
 }
 
@@ -228,7 +228,7 @@ function drawStateDiagram(expStack) {
 
             // get maximum x right between next state and start state
             var maxX = unionStartX + stateRadius;
-			
+
             for(var x = parseInt(unionStartState)+1; x<=parseInt(currentStateDrawn()); x++) {
                 var q = svg.find('#q' + x.toString());
                 var qMaxX = parseFloat(q.attr('cx')) + stateRadius;
@@ -314,29 +314,29 @@ function drawStateDiagram(expStack) {
         }
 
         else if(operator == '*') {
-			var stateBeforeStar = currentStateDrawn();
-			var stateBeforeConcat = stateCtr.toString();
-			drawArrowRightDown(e);
-			drawState();
+            var stateBeforeStar = currentStateDrawn();
+            var stateBeforeConcat = stateCtr.toString();
+            drawArrowRightDown(e);
+            drawState();
             pushSimulation(stackString, rgx);
-			if(input[0].length > 1)
-				drawStateDiagram(input);
-			else {
-				pushSimulation(stackString, input);
+            if(input[0].length > 1)
+                drawStateDiagram(input);
+            else {
+                pushSimulation(stackString, input);
                 concatInput(input);
             }
             pushSimulation(stackString, rgx);
-			drawArcArrowUp0000(e, stateBeforeConcat);
-			drawArrowLeftDown(e);
-			drawState();
-			drawArrowDownFromTo(stateBeforeStar, currentStateDrawn(), e);
+            drawArcArrowUp0000(e, stateBeforeConcat);
+            drawArrowLeftDown(e);
+            drawState();
+            drawArrowDownFromTo(stateBeforeStar, currentStateDrawn(), e);
         }
 
         else if(operator == '?') {
-			var stateBeforeConcat = currentStateDrawn();
-			if(input[0].length > 1)
-				drawStateDiagram(input);
-			else {
+            var stateBeforeConcat = currentStateDrawn();
+            if(input[0].length > 1)
+                drawStateDiagram(input);
+            else {
                 pushSimulation(stackString, input);
                 concatInput(input);
             }
@@ -348,24 +348,24 @@ function drawStateDiagram(expStack) {
         }
 
         else if(operator == '+') {
-			drawArrowDown(e);
-			drawState();
-			var stateBeforeConcat = currentStateDrawn();
-			if(input[0].length > 1)
-				drawStateDiagram(input);
-			else {
+            drawArrowDown(e);
+            drawState();
+            var stateBeforeConcat = currentStateDrawn();
+            if(input[0].length > 1)
+                drawStateDiagram(input);
+            else {
                 pushSimulation(stackString, input);
                 concatInput(input);
             }
             pushSimulation(stackString, rgx);
-			drawArcArrowUp2575(e, stateBeforeConcat);
-			drawArrowDown(e);
-			drawState();
+            drawArcArrowUp2575(e, stateBeforeConcat);
+            drawArrowDown(e);
+            drawState();
         }
 
         else if(operator == '.') {
             if(input[0].length > 1)
-				drawStateDiagram(input);
+                drawStateDiagram(input);
             else
                 concatInput(input);
         }
