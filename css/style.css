@@ -1,128 +1,118 @@
-* {
+*{
     font-family: "Century Gothic","CenturyGothicRegular",Verdana,Tahoma,Helvetica,sans-serif;
 }
-
-body
-{
-	background: #E0DFDF;
-	background: linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
-	background: -webkit-linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
-	background: -moz-linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
-	background: -o-linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
-	background: -ms-linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
-	background: linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
-	-svg-background: linear-gradient(top, #FFFFFF 0, #9B9797 1050px) no-repeat;
-	background-attachment: fixed !important;
-	margin: 0 auto;
-	font-size: 13px;
-	font-family: Arial, 'Arial Unicode MS', Helvetica, Sans-Serif;
-	font-weight: normal;
-	font-style: normal;
-	min-height: 100%;
-	left: 0;
-	top: 0;
+#txtRegex {
+    box-shadow: none;
 }
 
-svg {
-    background: #f7f6f6;
-}
-
-#navbar .navbar-brand {
-    font-weight: bold;
-    font-size: 1.4;
-}
-
-.main{
+#divLabelTop, #divLabelBot, #divCover, #divCover table {
     position: absolute;
-    left:0;
+    left: 0;
     width: 100%;
-}
-
-.main .container {
-    padding-top: 14px;
-    padding-bottom: 14px;
-    border-radius: 2px;
-}
-
-footer {
-    height: 30px !important;
     text-align: center;
-    margin-top: 15px;
-    margin-bottom: 15px;
+    cursor: pointer;
+    background: transparent;
 }
 
-footer h5, footer h6 {
-    margin: 0;
-    margin-bottom: 3px;
-    color: #666 !important;
-    text-shadow: 1px 1px #ddd;
-    font-family: "Century Gothic","CenturyGothicRegular",Verdana,Tahoma,Helvetica,sans-serif;
+#divLabelTop {
+    z-index: 1;
+    top: 0;
+    font-size: 3em;
+    color: #ccc;
+    text-shadow: 1px 1px #fff;
 }
 
-.Q {
-    stroke:#000;
-    stroke-width:1.5;
-    fill: transparent;
+#divLabelBot {
+    z-index: 1;
+    bottom: 0;
+    font-size: 1.5em;
+    color: #555;
+    text-shadow: 1px 1px #fff;
 }
 
-.text {
-    font-size: 1.2em;
-    dominant-baseline: middle;
-    text-anchor: start;
-    fill: blue;
+#divLabelBot u {
+    color: red;
+    font-size: 1.1em;
+    text-decoration: none;
 }
 
-.epsilon {
-    font-style: italic;
-    fill: gray;
+#divCover {
+    z-index: 3;
+    height: 600px;
+    background: black;
+    opacity: .1;
+    border-radius: 4px;
 }
 
-.center-align {
-    text-anchor: middle;
+#divPlay {
+    position: absolute;
+    left: 5px;
+    bottom: 5px;
+    z-index: 5;
+    cursor: pointer;
+    color: #777;
+    text-shadow: 1px 1px #fff;
 }
 
-.state {
-    font-size: 1.4em;
-    fill: #000;
+canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    cursor: pointer;
+    border-radius: 4px;
 }
 
-.arrow {
-    stroke: #000;
-    stroke-width: 1.2;
-    fill: transparent;
+/* to highlight the current regex */
+.a {
+    text-shadow: 1px 1px #fff;
+}
+
+.b {
+    color: #555;
+}
+
+#esc {
+    border: 0;
+    width: 0;
+    height: 0;
+    font-size: 0;
+}
+
+#tblTransition td {
+    text-align: center;
+    font-size: 1.3em;
+}
+
+#tblTransition thead td {
+    color: blue;
+    font-size: 1.8em;
+}
+
+#tblTransition tbody tr td:first-child {
+    color: green;
+}
+
+#tblTransition thead td, #tblTransition tbody tr td:first-child {
+
+
+}
+
+
+
+.bl {
+    border-left: 1px solid #ddd;
 }
 
 .br {
     border-right: 1px solid #ddd;
 }
 
-#tblTransition td {
-    text-align: center;
-    font-size: 1em;
+.blbr {
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
 }
 
-#tblTransition thead td {
-    color: blue;
-    font-size: 1.2em;
-}
 
-#tblTransition tbody tr td:first-child {
-    color: green;
-    font-size: 1.1em;
-}
 
-.panel-heading {
-    font-size: 1.3em;
-    font-weight: bold;
-}
 
-.panel-body {
-    max-width: 555px;
-    max-height: 545px;
-    overflow-y: auto;
-    overflow-x: auto;
-}
-
-#txtRegex {
-    font-size: 1.3em;
-}

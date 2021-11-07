@@ -1,449 +1,535 @@
-var stateCtr = 0;
-var e = '&epsilon;';
-var isAcceptingState = false;
-var stateRadius = 16;
-var stateDiameter = stateRadius * 2;
-var tblTransition;
-var btnConvert, txtRegex;
-var svg;
+var g;
+var txtRegex, btnConvert, divLabelTop, divLabelBot, divCover, esc, spPlay, tblTransition;
+var frame = 0;
+var tmrTransition;
 
-var svgWidth = 0;
-var svgHeight = 0;
-var transitions = new Array(); // 2D Array => [ [qFrom, input, qTo] ]
-var nxtX, nxtY;
+var tmrArrowRight = new Array();
+var tmrArrowUpRight = new Array();
+var tmrArrowDownRight = new Array();
+var draw_interval = 1100;
 
-var svgMaxHeight = 545;
-var svgMaxWidth = 555;
-
-var maxXRight = 0;
-
-var simClassCtr = 0;
-var simCurrentClass = '';
-var simClasses = new Array();
-var rgxProcessed = new Array();
-var topCoordinates = new Array();
-var leftCoordinates = new Array();
-var simInterval = 1300;
-var spRgxProcessed;
-
-
-var simTimer;
-
+var p = '';   // regex patern
+var rgx = ''; // entered regex
+var foundRegex = false;
 
 $(function() {
-    svg = $('#svg').find('g');
-    tblTransition = $('#tblTransition');
+    // a function to setup everything on load
+    setupCanvas();
+    // set global variables
+    txtRegex = $('#txtRegex'); txtRegex.focus();
     btnConvert = $('#btnConvert');
-    txtRegex = $('#txtRegex');
-    spRgxProcessed = $('#spRgxProcessed');
+    divLabelTop = $('#divLabelTop');
+    divLabelBot = $('#divLabelBot');
+    divCover = $('#divCover');
+    spPlay = $('#spPlay');
+    esc = $('#esc');
+    tblTransition = $('#tblTransition');
+    setupCanvas();
 
-    txtRegex.on('keyup', function() {
-        checkEnteredRegex(txtRegex.val().trim());
-    });
-
-    // enables the convert button if the entered regex is valid
-    function checkEnteredRegex(rgx) {
-        if(rgx == '') {
-            btnConvert.attr('disabled', true);
+    function playPause() {
+        if(spPlay.hasClass('glyphicon-pause')) {
+            pauseConstruct();
+            setPlayLabel('play');
         }
-        else {
-            btnConvert.attr('disabled', false);
+        else if(spPlay.hasClass('glyphicon-play')) {
+            construct();
+            setPlayLabel('pause');
         }
+        else if(spPlay.hasClass('glyphicon-refresh')) {
+            divLabelTop.find('span').removeClass('b');
+            writeToLabelBot("");
+            setupCanvas();
+            construct();
+        }
+        esc.focus();
     }
-
-    // EVENT: click of btnConvert
-    btnConvert.on('click', function() {
-        var rgx = txtRegex.val().trim();
-        resetSVG();
-        if(rgx.indexOf('(') > -1 || rgx.indexOf(')') > -1) {
-            if(!areParenthesisMatched(rgx)) {
-                rgx = '';
-                showAlertDialog("Invalid Regular Expression. Unmatched parenthesis.");
-            }
-        }
-        if(!areOperatorsValid(rgx)) {
-            showAlertDialog("Invalid Regular Expression");
-        }
-        else if(rgx != '') {
-            concatInput('');
-            drawStateDiagram(parseRgx(rgx));
-            drawAcceptingState();
-            drawTransitionTable();
-            simulate(rgx);
-        }
-    });
+    spPlay.on('click', playPause);
+    divCover.on('click', playPause);
 });
 
-
-// draws a state [with radius = stateRadius] in the current [nxtX, nxtY] location
-function drawState() {
-    var q = stateCtr.toString();
-    var cx = nxtX;
-    var cy = nxtY + stateRadius;
-    var circ = "<circle id='q" + q + "' class='Q" + simCurrentClass + "' cx='" + cx.toString() + "' cy='" + cy.toString() + "' r='" + stateRadius.toString() + "'></circle>";
-    var text = "<text class='state text center-align" + simCurrentClass + "' x='" + cx.toString() + "' y='" + (cy + 2).toString() + "'>" + q + "</text>";
-    addSvgHtml(circ + text);
-    nxtY += stateDiameter;
-    stateCtr += 1;
-    isAcceptingState = false;
-
-    if(cx + stateRadius > maxXRight)
-        maxXRight = cx + stateRadius;
-
-    adjustSvgSize();
+function setupCanvas() {
+    var x = document.getElementById("g");
+    g = x.getContext('2d');
+    g.clearRect(0, 0, x.width, x.height);
 }
 
-// draws a smaller circle inside a state for accepting state
-function drawAcceptingState() {
-    var lastState = svg.find('#q' + (stateCtr - 1).toString());
-    var cx = lastState.attr('cx');
-    var cy = lastState.attr('cy');
-    circ = "<circle class='Q" + simCurrentClass + "' cx='" + cx.toString() + "' cy='" + cy.toString() + "' r='" + (stateRadius - 3).toString() + "'></circle>";
-    addSvgHtml(circ);
-}
-
-// draws a straight arrow going to bottom [with height = stateDiameter] and a given input symbol
-function drawArrowDown(a) {
-    var endY = nxtY + stateDiameter;
-    var line = "<line class='arrow" + simCurrentClass + "' x1='" + nxtX.toString() + "' y1='" + (nxtY + 3).toString() + "' x2='" + nxtX.toString() + "' y2='" + (endY-3).toString() + "'></line>";
-    var extraClass = (a == e) ? ' epsilon' : '';
-    var text = "<text class='text" + extraClass + simCurrentClass + "' x='" + (nxtX + 4).toString() + "' y='" + (nxtY + stateRadius).toString() + "'>" + a + "</text>";
-    addSvgHtml(line + text);
-    nxtY += stateDiameter;
-    recordTransition(currentStateDrawn(), a, stateCtr.toString());
-}
-
-// draws a straight line (without arrow head) along with an input
-function drawLine(a, x1, y1, x2, y2) {
-    var line = "<line class='arrow" + simCurrentClass + "' style='marker-end: none' x1='" + x1.toString() + "' y1='" + y1.toString() + "' x2='" + x2.toString() + "' y2='" + y2.toString() + "'></line>";
-    var extraClass = (a == e) ? ' epsilon' : '';
-    var text = "<text class='text" + extraClass + simCurrentClass + "' x='" + (((x1 + x2)/2) + 3).toString() + "' y='" + (((y1 + y2)/2) - 3).toString() + "'>" + a + "</text>";
-    addSvgHtml(line + text);
-    nxtX = x2;
-    nxtY = y2;
-}
-
-// draws a straight arrow going to bottom left [with length = stateDiameter] and a given input symbol
-function drawArrowLeftDown(a) {
-    var cx = nxtX;
-    var cy = nxtY - stateRadius;
-    var px = cx + stateRadius * Math.cos(Math.PI * 0.75);
-    var py = cy + stateRadius * Math.sin(Math.PI * 0.75);
-    var l = stateDiameter * (Math.sin(45));
-    constructArrowLeftDown(a, px, py, px - l, py + l);
-}
-
-// draws a straight arrow going to bottom left and a given input symbol that connects to a state
-function drawCustArrowLeftDown(a, cx2, cy2) {
-    var cx1 = nxtX;
-    var cy1 = nxtY - stateRadius;
-    var px1 = cx1 + stateRadius * Math.cos(Math.PI * 0.75);
-    var py1 = cy1 + stateRadius * Math.sin(Math.PI * 0.75);
-    var px2 = cx2 + stateRadius * Math.cos(Math.PI * 1.75);
-    var py2 = cy2 + stateRadius * Math.sin(Math.PI * 1.75);
-    constructArrowLeftDown(a, px1, py1, px2, py2);
-}
-
-// the general instructions for drawing an arrow going to bottom left
-function constructArrowLeftDown(a, x1, y1, x2, y2) {
-    var line = "<line class='arrow" + simCurrentClass + "' x1='" + (x1 - 4).toString() + "' y1='" + (y1 + 4).toString() + "' x2='" + (x2 + 4).toString() + "' y2='" + (y2 - 4).toString() + "'></line>";
-    var midX = (x1 + x2) / 2;
-    var midY = (y1 + y2) / 2;
-    var extraClass = (a == e) ? ' epsilon' : '';
-    var text = "<text class='text" + extraClass + simCurrentClass + "' x='" + (midX + 4).toString() + "' y='" + (midY + 4).toString() + "'>" + a + "</text>";
-    var cx2 = x2 - stateRadius * Math.cos(Math.PI * 1.75);
-    var cy2 = y2 - stateRadius * Math.sin(Math.PI * 1.75);
-    nxtX = cx2 + stateRadius * Math.cos(Math.PI * 1.5);
-    nxtY = cy2 + stateRadius * Math.sin(Math.PI * 1.5);
-    recordTransition(currentStateDrawn(), a, stateCtr.toString());
-    addSvgHtml(line + text);
-}
-
-// draws a straight arrow going to bottom right [with length = stateDiameter] and a given input symbol
-function drawArrowRightDown(a) {
-    var cx = nxtX;
-    var cy = nxtY - stateRadius;
-    var px = cx + stateRadius * Math.cos(Math.PI * 0.25);
-    var py = cy + stateRadius * Math.sin(Math.PI * 0.25);
-    var l = stateDiameter * (Math.sin(45));
-    constructArrowRightDown(a, px, py, px + l, py + l);
-}
-
-// draws a straight arrow going to bottom right and a given input symbol that connects to a state
-function drawCustArrowRightDown(a, cx2, cy2) {
-    var cx1 = nxtX;
-    var cy1 = nxtY - stateRadius;
-    var px1 = cx1 + stateRadius * Math.cos(Math.PI * 0.25);
-    var py1 = cy1 + stateRadius * Math.sin(Math.PI * 0.25);
-    var px2 = cx2 + stateRadius * Math.cos(Math.PI * 1.25);
-    var py2 = cy2 + stateRadius * Math.sin(Math.PI * 1.25);
-    constructArrowRightDown(a, px1, py1, px2, py2);
-}
-
-// the general instructions for drawing an arrow going to bottom right
-function constructArrowRightDown(a, x1, y1, x2, y2) {
-    var line = "<line class='arrow" + simCurrentClass + "' x1='" + (x1 + 4).toString() + "' y1='" + (y1 + 4).toString() + "' x2='" + (x2 - 4).toString() + "' y2='" + (y2 - 4).toString() + "'></line>";
-    var midX = (x1 + x2) / 2;
-    var midY = (y1 + y2) / 2;
-    var extraClass = (a == e) ? ' epsilon' : '';
-    var text = "<text class='text" + extraClass + simCurrentClass + "' x='" + (midX + 4).toString() + "' y='" + (midY - 4).toString() + "'>" + a + "</text>";
-    var cx2 = x2 - stateRadius * Math.cos(Math.PI * 1.25);
-    var cy2 = y2 - stateRadius * Math.sin(Math.PI * 1.25);
-    nxtX = cx2 + stateRadius * Math.cos(Math.PI * 1.5);
-    nxtY = cy2 + stateRadius * Math.sin(Math.PI * 1.5);
-    recordTransition(currentStateDrawn(), a, stateCtr.toString());
-    addSvgHtml(line + text);
-}
-
-// draws a curve arrow from Math.PI*0.25 of lower state UP TO Math.PI*1.75 of upper state.
-function drawArcArrowUp2575(a, qTo) {
-    drawArcArrow(a, qTo, 'Up2575');
-}
-
-// draws a curve arrow from Math.PI*0 of lower state UP T0 Math.PI*0 of upper state.
-function drawArcArrowUp0000(a, qTo) {
-    drawArcArrow(a, qTo, 'Up0000');
-}
-
-// draws a curve arrow from Math.PI*0.25 of upper state DOWN TO Math.PI*1.75 of upper state.
-function drawArcArrowDown2575(a, qFrom) {
-    drawArcArrow(a, qFrom, 'Down2575');
-}
-
-// the general instructions for drawing an arc arrow
-function drawArcArrow(a, qToOrFrom, type) {
-    var q = svg.find('#q' + qToOrFrom);
-
-    var cx1 = parseFloat(q.attr('cx'));
-    var cy1 = parseFloat(q.attr('cy'));
-
-    var px1, py1;
-
-    switch(type) {
-        case 'Up2575':
-        {
-            px1 = cx1 + stateRadius * Math.cos(Math.PI * 1.75) + 2;
-            py1 = cy1 + stateRadius * Math.sin(Math.PI * 1.75) + 2;
-        }break;
-        case 'Up0000':
-        {
-            px1 = cx1 + stateRadius * Math.cos(0) + 2;
-            py1 = cy1 + stateRadius * Math.sin(0) + 2;
-        }break;
-        case 'Down2575':
-        {
-            px1 = cx1 + stateRadius * Math.cos(Math.PI * 0.25) + 2;
-            py1 = cy1 + stateRadius * Math.sin(Math.PI * 0.25) + 2;
-        }break;
-    }
-
-    var cx2 = nxtX;
-    var cy2 = nxtY - stateRadius;
-
-    var px2, py2;
-    switch(type) {
-        case 'Up2575':
-        {
-            px2 = cx2 + stateRadius * Math.cos(Math.PI * 0.25) + 2;
-            py2 = cy2 + stateRadius * Math.sin(Math.PI * 0.25) + 2;
-        }break;
-        case 'Up0000':
-        {
-            px2 = cx2 + stateRadius * Math.cos(0) + 2;
-            py2 = cy2 + stateRadius * Math.sin(0) + 2;
-        }break;
-        case 'Down2575':
-        {
-            px2 = cx2 + stateRadius * Math.cos(Math.PI * 1.75) + 2;
-            py2 = cy2 + stateRadius * Math.sin(Math.PI * 1.75) + 2;
-        }break;
-    }
-
-    var l = py2 - py1;
-
-    // determine the maxX between states
-    var maxX = cx1;
-    var ctr = 0;
-    for(var i=(parseInt(qToOrFrom)+1); i<(stateCtr-1); i++) {
-        var cx = parseFloat(svg.find('#q' + i.toString()).attr('cx'));
-        if(cx > maxX)
-            maxX = cx;
-        ctr += 1;
-    }
-    var qx =  l * 0.45 - (cx1 - maxX);
-    //if(type=='Down2575' || type=='Up2575')
-    //    qx += qx*0.10;
-    var vx = l * 0.9;
-    var rx = px2 + qx;
-
-    var y1 = py2 - vx;
-    var y2 = py1 + vx;
-
-    var path = "<path class='arrow" + simCurrentClass + "' d='M";
-    if(type == 'Up2575' || type == 'Up0000') {
-        path += px2.toString() + "," + py2.toString() + " C" + rx.toString() + "," + y2.toString() + "," + rx.toString() + "," + y1.toString() + "," + px1.toString() + "," + py1.toString() + "'></path>";
-        recordTransition(currentStateDrawn(), a, qToOrFrom);
-    }
-    else if(type == 'Down2575') {
-        path += px1.toString() + "," + py1.toString() + " C" + rx.toString() + "," + y1.toString() + "," + rx.toString() + "," + y2.toString() + "," + px2.toString() + "," + py2.toString() + "'></path>";
-        recordTransition(qToOrFrom, a, currentStateDrawn());
-    }
-
-    var midX1 = (rx + px1) / 2;
-    var midX2 = ((rx + midX1) / 2);
-    var tx = midX2 + 2;
-
-    var ty = py1 + (l * 0.5);
-    var extraClass = (a == e) ? ' epsilon' : '';
-    var text = "<text class='text text" + qToOrFrom + "" + extraClass + simCurrentClass + "' id='" + tx.toString() + '|' + ty.toString() + "' x='" + tx.toString() + "' y='" + ty.toString() + "'>" + a + "</text>";
-
-    addSvgHtml(path + text);
-
-    if(tx > maxXRight)
-        maxXRight = tx;
-
-    adjustSvgSize();
-}
-
-// draws a straight arrow going down from state A to state B and a given input symbol
-function drawArrowDownFromTo(pA, pB, a) {
-    qA = svg.find('#q' + pA);
-    qB = svg.find('#q' + pB);
-
-    var x1 = parseFloat(qA.attr('cx'));
-    var y1 = parseFloat(qA.attr('cy')) + stateRadius + 3;
-    var x2 = parseFloat(qB.attr('cx'));
-    var y2 = parseFloat(qB.attr('cy')) - stateRadius - 3;
-
-    var line = "<line class='arrow" + simCurrentClass + "' x1='" + x1.toString() + "' y1='" + y1.toString() + "' x2='" + x2.toString() + "' y2='" + y2.toString() + "'></line>";
-
-    var tx = x1 + 4;
-    var ty = y1 + ((y2 - y1) / 2);
-
-    var extraClass = (a == e) ? ' epsilon' : '';
-    var text = "<text class='text" + extraClass + simCurrentClass + "' x='" + tx.toString() + "' y='" + ty.toString() + "'>" + a + "</text>";
-
-    recordTransition(pA, a, pB);
-    addSvgHtml(line + text);
-}
-
-// draws a red dot [with diameter = 6] for testing a given coordinate
-function testMarker(cx, cy) {
-    var dot = "<circle cx='" + cx.toString() + "' cy='" + cy.toString() + "' r='3' fill='red'></circle>";
-    svg.html(svg.html() + dot);
-}
-
-// stores the transition made
-function recordTransition(qFrom, a, qTo) {
-    var transition = new Array();
-    transition.push(qFrom);
-    transition.push(a);
-    transition.push(qTo);
-    transitions.push(transition);
-}
-
-function transitionExists(qFrom, a, qTo) {
-    var alreadyExists = false;
-    for(var i=0; i<transitions.length; i++) {
-        //alert("transitions | transition\n" + transitions[i] + "\n" + transition);
-        if(transitions[i][0] == qFrom &&  transitions[i][1] == a && transitions[i][2] == qTo) {
-            alreadyExists = true;
-            break;
+// starts the automaton construction
+function construct() {
+    foundRegex = true;
+    setupCanvas();
+    setPlayLabel('pause');
+    tmrTransition = setInterval(function() {
+        // a
+        if(p == 'a') {
+            a(rgx);
+            drawTransTbl_a(rgx);
         }
-    }
-    return alreadyExists;
-}
 
-function currentStateDrawn() {
-    return (stateCtr - 1).toString();
-}
-
-function drawTransitionTable() {
-    tblTransition.html('');
-
-    var tblHtml = '';
-    // get and write inputs on table header
-    var inputsReceived = new Array();
-    var tL = transitions.length;
-
-    for(var i=0; i<tL; i++) {
-        inputsReceived.push(transitions[i][1]);
-    }
-    inputsReceived = sortInputs(filterUnique(inputsReceived));
-    tblHtml += "<thead>";
-        tblHtml += "<tr>";
-        tblHtml += "<td class='br'>&nbsp;</td>";
-        var iL = inputsReceived.length;
-        for(var i=0; i<iL; i++) {
-            var className = (i != (iL-1)) ? " class='br'" : "";
-            tblHtml += "<td" + className + ">" + inputsReceived[i] + "</td>";
+        // ab
+        else if(p == 'ab') {
+            a_b(rgx[0], rgx[1]);
+            drawTransTbl_a_b(rgx[0], rgx[1]);
         }
-        tblHtml += "</tr>";
-    tblHtml += "</thead>";
 
-    // tabulate the transition of each state!
-    tblHtml += "<tbody>";
-    for(var i=0; i<stateCtr; i++) {
-        tblHtml += "<tr>";
-            tblHtml += "<td class='br'>" + i.toString() + "</td>";
-            for(var j=0; j<iL; j++) {
-                var tFunc = new Array();
-                for(var k=0; k<tL; k++) {
-                    if(transitions[k][0] == i.toString() && transitions[k][1] == inputsReceived[j]) {
-                        tFunc.push(transitions[k][2]);
-                    }
+        // a*
+        else if(p == 'a*') {
+            a_star(rgx[0]);
+            drawTransTbl_a_star(rgx[0]);
+        }
+
+        // abc
+        else if(p == 'abc') {
+            a_b_c(rgx[0], rgx[1], rgx[2]);
+            drawTransTbl_a_b_c(rgx[0], rgx[1], rgx[2]);
+        }
+
+        // a*b
+        else if(p == 'a*b') {
+            a_star_b(rgx[0], rgx[2]);
+            drawTransTbl_a_star_b(rgx[0], rgx[2]);
+        }
+
+        // ab*
+        else if(p == 'ab*') {
+            a_b_star(rgx[0], rgx[1]);
+            drawTransTbl_a_b_star(rgx[0], rgx[1]);
+        }
+
+        // a*b*
+        else if(p == 'a*b*') {
+            a_star_b_star(rgx[0], rgx[2]);
+            drawTransTbl_a_star_b_star(rgx[0], rgx[2]);
+        }
+
+        // a*bc
+        else if(p == 'a*bc') {
+            a_star_b_c(rgx[0], rgx[2], rgx[3]);
+            drawTransTbl_a_star_b_c(rgx[0], rgx[2], rgx[3]);
+        }
+
+        // ab*c
+        else if(p == 'ab*c') {
+            a_b_star_c(rgx[0], rgx[1], rgx[3]);
+            drawTransTbl_a_b_star_c(rgx[0], rgx[1], rgx[3]);
+        }
+
+        // abc*
+        else if(p == 'abc*') {
+            a_b_c_star(rgx[0], rgx[1], rgx[2]);
+            drawTransTbl_a_b_c_star(rgx[0], rgx[1], rgx[2]);
+        }
+
+        // a*|b
+        else if(p == 'a*|b') {
+            a_star_union_b(rgx[0], rgx[3]);
+            drawTransTbl_a_star_union_b(rgx[0], rgx[3]);
+        }
+
+        // a|b*
+        else if(p == 'a|b*') {
+            a_union_b_star(rgx[0], rgx[2]);
+            drawTransTbl_a_union_b_star(rgx[0], rgx[2]);
+        }
+
+        // a*bc*
+        else if(p == 'a*bc*') {
+            a_star_b_c_star(rgx[0], rgx[2], rgx[3]);
+            drawTransTbl_a_star_b_c_star(rgx[0], rgx[2], rgx[3]);
+        }
+
+        // a*b*c
+        else if(p == 'a*b*c') {
+            a_star_b_star_c(rgx[0], rgx[2], rgx[4]);
+            drawTransTbl_a_star_b_star_c(rgx[0], rgx[2], rgx[4]);
+        }
+
+        // ab*c*
+        else if(p == 'ab*c*') {
+            a_b_star_c_star(rgx[0], rgx[1], rgx[3]);
+            drawTransTbl_a_b_star_c_star(rgx[0], rgx[1], rgx[3]);
+        }
+
+        // a*b*c*
+        else if(p == 'a*b*c*') {
+            a_star_b_star_c_star(rgx[0], rgx[2], rgx[4]);
+            drawTransTbl_a_star_b_star_c_star(rgx[0], rgx[2], rgx[4]);
+        }
+
+        // a|(b|c)
+        else if(p == 'a|(b|c)') {
+            a_union__b_union_c(rgx[0], rgx[3], rgx[5]);
+            drawTransTbl_a_union__b_union_c(rgx[0], rgx[3], rgx[5]);
+        }
+
+        // (a|b)|c
+        else if(p == '(a|b)|c') {
+            a_union_b__union_c(rgx[1], rgx[3], rgx[6]);
+            drawTransTbl_a_union_b__union_c(rgx[1], rgx[3], rgx[6]);
+        }
+
+        // (a*b*)*
+        else if(p == '(a*b*)*') {
+            a_star_b_star__star(rgx[1], rgx[3]);
+            drawTransTbl_a_star_b_star__star(rgx[1], rgx[3]);
+        }
+
+
+
+
+        //a_union_b('a', 'b');
+        //a('a');
+        //a_star('a');
+        //a_b('a', 'b');
+        //a_union_b_star('a', 'b');
+        //a_star_union_b('a', 'b');
+        //a_star_b('a', 'b');
+        //a_b_star('a', 'b');
+        //a_star_b_star('a', 'b');
+        //a_star_b_star__star('a', 'b');
+        //a_b_c('a', 'b', 'c');
+        //a_union__b_union_c('3', 'b', 'c');
+        //a_union_b__union_c('a', 'b', 'c');
+        //a_star_b_c('a', 'b', 'c');
+        //a_b_star_c('a', 'b', 'c');
+        //a_b_c_star('a', 'b', 'c');
+        //a_star_b_star_c_star('a', 'b', 'c');
+        //a_star_b_star_c('a', 'b', 'c');
+        //a_b_star_c_star('a', 'b', 'c');
+        //a_star_b_c_star('a', 'b', 'c');
+    }, draw_interval);
+}
+
+// pauses the automaton construction
+function pauseConstruct() {
+    clearInterval(tmrTransition);
+}
+
+// draws a single-outlined circle for a state
+function drawState(center_x, center_y, state_name) {
+    g.fillStyle = "#000";
+    g.lineWidth = 2;
+    g.beginPath();
+    g.arc(center_x, center_y, 28, 0, 2 * Math.PI);
+    g.stroke();
+
+    var fontSize = 24;
+    g.font = fontSize.toString() + "px Arial";
+    g.fillText(state_name, center_x - (fontSize/3), center_y + (fontSize/3));
+}
+
+// draws a double-outlined circle for accepting state
+function drawAcceptingState(center_x, center_y, state_name) {
+    drawState(center_x, center_y, state_name);
+    g.beginPath();
+    g.arc(center_x, center_y, 23, 0, 2 * Math.PI);
+    g.stroke();
+}
+
+// draws a single-outlined circle for a small state
+function drawSmState(center_x, center_y, state_name) {
+    g.fillStyle = "#000";
+    g.lineWidth = 1.5;
+    g.beginPath();
+    g.arc(center_x, center_y, 21, 0, 2 * Math.PI);
+    g.stroke();
+
+    var fontSize = 22;
+    g.font = fontSize.toString() + "px Arial";
+    g.fillText(state_name, center_x - (fontSize/3.5), center_y + (fontSize/3));
+}
+
+// draws a double-outlined circle for a small accepting state
+function drawSmAcceptingState(center_x, center_y, state_name) {
+    drawSmState(center_x, center_y, state_name);
+    g.beginPath();
+    g.arc(center_x, center_y, 18, 0, 2 * Math.PI);
+    g.stroke();
+}
+
+// writes an epsilon beside an arrow or arc
+function labelEpsilon(x, y) {
+    g.font = "22px Century Gothic";
+    g.fillStyle = "green";
+    g.fillText('\u03B5', x, y);
+}
+function labelSmEpsilon(x, y) {
+    g.font = "19px Century Gothic";
+    g.fillStyle = "green";
+    g.fillText('\u03B5', x, y);
+}
+
+// writes the input symbol beside an arrow or arc
+function labelInput(c, x, y) {
+    g.font = "22px Century Gothic";
+    g.fillStyle = "blue";
+    g.fillText(c, x, y);
+}
+function labelSmInput(c, x, y) {
+    g.font = "18px Century Gothic";
+    g.fillStyle = "blue";
+    g.fillText(c, x, y);
+}
+
+// highlights the current symbol of the regex being converted
+function writeToLabelTop(html) {
+    divLabelTop.html(html)
+}
+
+// writes the current step in constructing the automaton
+function writeToLabelBot(html) {
+    divLabelBot.html(html);
+}
+
+// sets play|pause|refresh icon
+function setPlayLabel(lbl) {
+    spPlay.removeClass('glyphicon glyphicon-play');
+    spPlay.removeClass('glyphicon glyphicon-pause');
+    spPlay.removeClass('glyphicon glyphicon-refresh');
+    spPlay.addClass('glyphicon glyphicon-' + lbl);
+}
+
+// draws a line with arrow head
+function drawArrow(fromx, fromy, tox, toy, head_w){
+    var headlen = 1;
+    var angle = Math.atan2(toy-fromy,tox-fromx);
+
+    //starting path of the arrow from the start square to the end square and drawing the stroke
+    g.beginPath();
+    g.moveTo(fromx, fromy);
+    g.lineTo(tox, toy);
+    g.strokeStyle = "#000";
+    g.lineWidth = (head_w >= 7) ? 2 : 1.5;
+    g.stroke();
+
+    //starting a new path from the head of the arrow to one of the sides of the point
+    g.beginPath();
+    g.moveTo(tox, toy);
+    g.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
+
+    //path from the side point of the arrow, to the other side point
+    g.lineTo(tox-headlen*Math.cos(angle+Math.PI/7),toy-headlen*Math.sin(angle+Math.PI/7));
+
+    //path from the side point back to the tip of the arrow, and then again to the opposite side point
+    g.lineTo(tox, toy);
+    g.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
+
+    //draws the paths created above
+    g.strokeStyle = "#000";
+    g.lineWidth = head_w;
+    g.stroke();
+    g.fillStyle = "#000";
+    g.fill();
+}
+
+// draws small animated arrow to the right
+function drawSmArrowRight(start_x, start_y, label, label_x, label_y) {
+    arrowRight(start_x, start_y, label, label_x, label_y, 20, 6, 10);
+}
+// draws custom animated arrow to the right
+function drawCustArrowRight(start_x, start_y, end_x, end_y, label, label_x, label_y) {
+    arrowRight(start_x, start_y, label, label_x, label_y, end_x - start_x, 6, 7);
+}
+// draws large custom animated arrow to the right
+function drawCustLgArrowRight(start_x, start_y, end_x, end_y, label, label_x, label_y) {
+    arrowRight(start_x, start_y, label, label_x, label_y, (end_x - start_x), 7, 6);
+}
+function arrowRight(start_x, start_y, label, label_x, label_y, max_length, arrow_size, interval) {
+    var length = 3;
+    tmrArrowRight.push(setInterval(function() {
+        if(length <= max_length) {
+            g.clearRect(start_x-(arrow_size-5), start_y - 7, length -1, 14);
+            drawArrow(start_x, start_y, start_x + length, start_y, arrow_size);
+        }
+        else {
+            if(arrow_size < 7)
+                drawSmLabel(label, label_x, label_y);
+            else
+                drawLgLabel(label, label_x, label_y);
+            setTimeout(function() {
+                for(var i=0; i<tmrArrowRight.length; i++) {
+                    clearInterval(tmrArrowRight[i]);
                 }
-                var className = (j != (iL-1)) ? " class='br'" : "";
-                tblHtml += "<td" + className + ">";
-                tblHtml += tFunc.join(', ');
-                tblHtml += "</td>";
-            }
-        tblHtml += "</tr>";
+            }, 1);
+        }
+        length += 1;
+    }, interval));
+}
+
+// draws a small animated arrow going to upper right
+function drawSmArrowUpRight(start_x, start_y, label, label_x, label_y) {
+    arrowUpRight(start_x, start_y, label, label_x, label_y, 13, 6, 20);
+}
+// draws a custom animated arrow going to upper right
+function drawCustArrowUpRight(start_x, start_y, end_x, end_y, label, label_x, label_y) {
+    arrowUpRight(start_x, start_y, label, label_x, label_y, (end_x - start_x), 6, 15);
+}
+// draws a large custom animated arrow going to upper right
+function drawCustLgArrowUpRight(start_x, start_y, end_x, end_y, label, label_x, label_y) {
+    arrowUpRight(start_x, start_y, label, label_x, label_y, (end_x - start_x), 7, 15);
+}
+function arrowUpRight(start_x, start_y, label, label_x, label_y, max_length, arrow_size, interval) {
+    var length = 7;
+    tmrArrowUpRight.push(setInterval(function() {
+        if(length <= max_length) {
+            g.clearRect(start_x - (arrow_size - 6), start_y - (max_length + 1), (max_length + 6), max_length + (arrow_size-5));
+            drawArrow(start_x, start_y, start_x + length, start_y - length, arrow_size);
+        }
+        else {
+            if(arrow_size < 7)
+                drawSmLabel(label, label_x, label_y);
+            else
+                drawLgLabel(label, label_x, label_y);
+            setTimeout(function() {
+                for(var i=0; i<tmrArrowUpRight.length; i++) {
+                    clearInterval(tmrArrowUpRight[i]);
+                }
+            }, 1);
+        }
+        length += 1;
+    }, interval));
+}
+
+// draws a small animated arrow going to bottom right
+function drawSmArrowDownRight(start_x, start_y, label, label_x, label_y) {
+    arrowDownRight(start_x, start_y, label, label_x, label_y, 13, 6, 20);
+}
+// draws a small custom animated arrow going to bottom right
+function drawCustArrowDownRight(start_x, start_y, end_x, end_y, label, label_x, label_y) {
+    arrowDownRight(start_x, start_y, label, label_x, label_y, end_x - start_x, 6, 15);
+}
+// draws a large custom animated arrow going to bottom right
+function drawCustLgArrowDownRight(start_x, start_y, end_x, end_y, label, label_x, label_y) {
+    arrowDownRight(start_x, start_y, label, label_x, label_y, (end_x - start_x), 7, 15);
+}
+function arrowDownRight(start_x, start_y, label, label_x, label_y, max_length, arrow_size, interval) {
+    var length = 7;
+    tmrArrowDownRight.push(setInterval(function() {
+        if(length <= max_length) {
+            g.clearRect(start_x, start_y - (arrow_size - 6), (max_length + 6), max_length + (arrow_size - 6));
+            drawArrow(start_x, start_y, start_x + length, start_y + length, arrow_size);
+        }
+        else {
+            if(arrow_size < 7)
+                drawSmLabel(label, label_x, label_y);
+            else
+                drawLgLabel(label, label_x, label_y);
+            setTimeout(function() {
+                for(var i=0; i<tmrArrowDownRight.length; i++) {
+                    clearInterval(tmrArrowDownRight[i]);
+                }
+            }, 1);
+        }
+        length += 1;
+    }, interval));
+}
+
+// draws a small animated arrow going to bottom left
+function drawSmArrowDownLeft(start_x, start_y, label, label_x, label_y) {
+    arrowDownRight(start_x, start_y, label, label_x, label_y, 13, 6, 20);
+}
+// draws a small custom animated arrow going to bottom left
+function drawCustArrowDownLeft(start_x, start_y, end_x, end_y, label, label_x, label_y) {
+    arrowDownLeft(start_x, start_y, label, label_x, label_y, end_x - start_x, 6, 15);
+}
+// draws a large custom animated arrow going to bottom left
+function drawCustLgArrowDownLeft(start_x, start_y, end_x, end_y, label, label_x, label_y) {
+    arrowDownLeft(start_x, start_y, label, label_x, label_y, (start_x - end_x), 7, 15);
+}
+function arrowDownLeft(start_x, start_y, label, label_x, label_y, max_length, arrow_size, interval) {
+    var length = 7;
+    tmrArrowDownRight.push(setInterval(function() {
+        if(length <= max_length) {
+            g.clearRect(start_x - max_length-3 , start_y , (max_length + 7), max_length + (arrow_size - 6));
+            drawArrow(start_x, start_y, start_x - length, start_y + length, arrow_size);
+        }
+        else {
+            if(arrow_size < 7)
+                drawSmLabel(label, label_x, label_y);
+            else
+                drawLgLabel(label, label_x, label_y);
+            setTimeout(function() {
+                for(var i=0; i<tmrArrowDownRight.length; i++) {
+                    clearInterval(tmrArrowDownRight[i]);
+                }
+            }, 1);
+        }
+        length += 1;
+    }, interval));
+}
+
+// draws a small label on a specified location after arrow's animation
+function drawSmLabel(label, label_x, label_y) {
+    if(parseInt(label) == 3 && typeof label != 'string') {
+        labelSmEpsilon(label_x, label_y);
     }
-    tblHtml += "</tbody>";
-    tblTransition.html(tblHtml);
-}
-
-// updates the SVG
-function addSvgHtml(html) {
-    svg.html(svg.html() + html);
-}
-
-function resetSVG() {
-    clearInterval(simTimer);
-    simClassCtr = 0;
-    simCurrentClass = ' startstate';
-    simClasses = new Array();
-    rgxProcessed = new Array();
-    rgxProcessed.push('');
-    simClasses.push(simCurrentClass);
-    topCoordinates = new Array();
-    topCoordinates.push(0);
-    leftCoordinates = new Array();
-    leftCoordinates.push(0);
-
-
-    svgWidth = svgMaxWidth;
-    svgHeight = svgMaxHeight;
-    svg.css({'height' : svgHeight.toString() + 'px'});
-    svg.css({'width' : svgWidth.toString() + 'px'});
-    nxtX = stateDiameter * 1.5;
-    maxXRight = nxtX + stateRadius;
-    nxtY = 20;
-    stateCtr = 0;
-    transitions = new Array();
-    //var defaultHTML = "<defs id='markerDefs'><marker id='arrow' markerWidth='9' markerHeight='7' refx='8' refy='4' orient='auto' markerUnits='strokeWidth'><path d='M0,0 L0,7 L9,4 Z' fill='#000'></path></marker></defs>";
-    svg.html('');
-    tblTransition.html('');
-}
-
-function adjustSvgSize() {
-    if(nxtY > svgHeight) {
-        svgHeight = nxtY + stateRadius;
-        svg.parent().css({'height' : svgHeight.toString() + 'px'});
-    }
-    if(maxXRight > svgWidth) {
-        svgWidth = maxXRight + stateRadius;
-        svg.parent().css({'width' : svgWidth.toString() + 'px'});
+    else {
+        labelSmInput(label, label_x, label_y);
     }
 }
+
+// draws a large label on a specified location after arrow's animation
+function drawLgLabel(label, label_x, label_y) {
+    if(parseInt(label) == 3 && typeof label != 'string') {
+        labelEpsilon(label_x, label_y);
+    }
+    else {
+        labelInput(label, label_x, label_y);
+    }
+}
+
+// draws ArcTo
+function drawArc(center_x, center_y, radius, start_angle, end_angle) {
+    g.lineWidth = 1.7;
+    g.beginPath();
+    g.arc(center_x, center_y, radius, Math.PI * start_angle, Math.PI * end_angle);
+    g.stroke();
+}
+
+// draws an arrow head on a specific location
+function drawArrowhead(startx, starty, endx, endy, sizex, sizey) {
+    var angle =  Math.atan2((endy - starty), (endx - startx));
+    var hx = sizex / 2;
+    var hy = sizey / 2;
+
+    g.translate((startx ), (starty));
+    g.rotate(angle);
+    g.translate(-hx,-hy);
+
+    g.fillStyle = "#000";
+    g.beginPath();
+    g.moveTo(0,0);
+    g.lineTo(0,1*sizey);
+    g.lineTo(1*sizex,1*hy);
+    g.closePath();
+    g.fill();
+
+    g.translate(hx,hy);
+    g.rotate(-angle);
+    g.translate(-startx,-starty);
+}
+
+// draws an arc with arrow
+function drawArcArrow(center_x, center_y, radius, start_angle, end_angle, arrow_size, clockwise) {
+    drawArc(center_x, center_y, radius, start_angle, end_angle);
+    var x1, y1, x2, y2;
+    if(clockwise) {
+        x1 = center_x + radius * Math.cos(Math.PI * end_angle - 0.01);
+        y1 = center_y + radius * Math.sin(Math.PI * end_angle - 0.01);
+        x2 = center_x + radius * Math.cos(Math.PI * end_angle + 0.01);
+        y2 = center_y + radius * Math.sin(Math.PI * end_angle + 0.01);
+    }
+    else {
+        x1 = center_x + radius * Math.cos(Math.PI * start_angle + 0.01);
+        y1 = center_y + radius * Math.sin(Math.PI * start_angle + 0.01);
+        x2 = center_x + radius * Math.cos(Math.PI * start_angle - 0.01);
+        y2 = center_y + radius * Math.sin(Math.PI * start_angle - 0.01);
+    }
+    drawArrowhead(x1, y1, x2, y2, arrow_size, arrow_size);
+}
+
+// sets top caption's top and bottom label's bottom
+function setCaptionPositions(topTop, botBot) {
+    divLabelTop.css({'top':topTop.toString() + 'px'});
+    divLabelBot.css({'bottom' : botBot.toString() + 'px'});
+}
+
