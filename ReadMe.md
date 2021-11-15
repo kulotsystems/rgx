@@ -36,6 +36,12 @@
     Example: <code>((a?b)|c*)+d</code>
 </small>
 <hr>
-<small><b>How to run:</b> Just open <code>index.html</code> on your web browser or visit <a href="https://kulotsystems.github.io/rgx/" target="_blank">https://kulotsystems.github.io/rgx/</a>.</small>
+<small>
+    <b>How to run:</b> Just open <code>index.html</code> on your web browser or visit either of the following:
+    <ul>
+        <li><a href="https://kulotsystems.github.io/rgx" target="_blank">https://kulotsystems.github.io/rgx</a></li>
+        <li><a href="https://rgx.netlify.app" target="_blank">https://rgx.netlify.app</a></li>
+    </ul>
+</small>
 <br><br>
 <small><i>(This project was created in year 2016)</i></small>
